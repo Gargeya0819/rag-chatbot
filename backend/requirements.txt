@@ -1,0 +1,22 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+pgvector==0.3.6
+httpx==0.28.1
+python-multipart==0.0.18
+pdfplumber==0.11.4
+pypdf==5.1.0
+
+# Free local ML (no paid APIs needed)
+sentence-transformers==3.3.1
+torch==2.5.1
+transformers==4.47.1
+# ── Additions for Mode 2: Local Lightweight RAG ───────────────
+
+pymupdf4llm==0.0.17       # PDF -> Markdown extraction with heading detection
+pymupdf==1.24.10          # Underlying PyMuPDF (fitz) library
+llama-cpp-python==0.2.90  # Local GGUF model inference (CPU build)
+structlog==24.4.0
