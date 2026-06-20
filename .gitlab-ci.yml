@@ -1,0 +1,39 @@
+# GitLab CI Pipeline — runs the same checks as the local pre-commit hooks,
+# so pushes/merge requests are verified even if a contributor skips
+# `pre-commit install` locally.
+
+stages:
+  - lint
+  - typecheck
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+default:
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq build-essential curl libpq-dev libmagic1 poppler-utils tesseract-ocr > /dev/null
+    - cd backend
+    - pip install -q -r requirements.txt
+    - pip install -q -r requirements-dev.txt
+
+ruff-lint:
+  stage: lint
+  script:
+    - ruff check app/ --config pyproject.toml
+    - ruff format --check app/ --config pyproject.toml
+
+mypy-typecheck:
+  stage: typecheck
+  script:
+    - mypy app/ --config-file pyproject.toml
+
+pytest:
+  stage: test
+  script:
+    - python -m pytest
