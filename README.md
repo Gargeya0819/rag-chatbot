@@ -1,4 +1,4 @@
-# 🤖 Free RAG Chatbot
+# RAG Chatbot
 
 A fully **free, locally-running** RAG (Retrieval-Augmented Generation) chatbot.  
 **No API keys. No costs. No internet needed after setup.**
