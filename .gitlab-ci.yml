@@ -1,11 +1,13 @@
-# GitLab CI Pipeline — runs the same checks as the local pre-commit hooks,
-# so pushes/merge requests are verified even if a contributor skips
-# `pre-commit install` locally.
+# GitLab CI Pipeline — explicit stages so each quality gate is independently
+# visible (format / lint / type_check / test / coverage), matching what
+# compliance scanners look for stage-by-stage rather than bundled jobs.
 
 stages:
   - lint
-  - typecheck
+  - format
+  - type_check
   - test
+  - coverage
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -22,18 +24,33 @@ default:
     - pip install -q -r requirements.txt
     - pip install -q -r requirements-dev.txt
 
-ruff-lint:
+lint:
   stage: lint
   script:
     - ruff check app/ --config pyproject.toml
+
+format:
+  stage: format
+  script:
     - ruff format --check app/ --config pyproject.toml
 
-mypy-typecheck:
-  stage: typecheck
+type_check:
+  stage: type_check
   script:
     - mypy app/ --config-file pyproject.toml
 
-pytest:
+test:
   stage: test
   script:
     - python -m pytest
+
+coverage:
+  stage: coverage
+  script:
+    - python -m pytest --cov=app --cov-report=term --cov-report=xml --cov-fail-under=40
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage.xml
