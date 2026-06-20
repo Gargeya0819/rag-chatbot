@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+
 
 class Settings(BaseSettings):
     # Database
@@ -8,13 +8,13 @@ class Settings(BaseSettings):
 
     # Ollama (free, local LLM)
     OLLAMA_BASE_URL: str = "http://ollama:11434"
-    OLLAMA_MODEL: str = "llama3.2"          # ~2GB, fast on CPU
+    OLLAMA_MODEL: str = "llama3.2"  # ~2GB, fast on CPU
     OLLAMA_EMBED_MODEL: str = "nomic-embed-text"  # free local embeddings
 
     # Embedding (via Ollama or sentence-transformers fallback)
     EMBEDDING_DIM: int = 768
-    EMBEDDING_BACKEND: str = "ollama"       # "ollama" | "sentence_transformers"
-    ST_MODEL: str = "all-MiniLM-L6-v2"     # used if backend=sentence_transformers
+    EMBEDDING_BACKEND: str = "ollama"  # "ollama" | "sentence_transformers"
+    ST_MODEL: str = "all-MiniLM-L6-v2"  # used if backend=sentence_transformers
 
     # Retrieval
     CHUNK_SIZE: int = 512
@@ -30,5 +30,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+
 
 settings = Settings()

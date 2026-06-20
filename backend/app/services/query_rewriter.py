@@ -1,7 +1,8 @@
-import httpx
-import json
-from app.core.config import settings
 import logging
+
+import httpx
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ Rules:
 Original question: {question}
 Rewritten query:"""
 
+
 async def rewrite_query(question: str) -> str:
     """Use Ollama to rewrite the query for better retrieval."""
     try:
@@ -27,8 +29,8 @@ async def rewrite_query(question: str) -> str:
                     "model": settings.OLLAMA_MODEL,
                     "prompt": REWRITE_PROMPT.format(question=question),
                     "stream": False,
-                    "options": {"temperature": 0.1, "num_predict": 50}
-                }
+                    "options": {"temperature": 0.1, "num_predict": 50},
+                },
             )
             resp.raise_for_status()
             rewritten = resp.json()["response"].strip().strip('"')

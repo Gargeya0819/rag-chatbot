@@ -9,10 +9,12 @@ For scanned PDFs or documents with no visual heading hierarchy, this will
 return mostly flat paragraph text with no '#' markers — sectioner.py
 detects that case and falls back to paragraph-based chunking instead.
 """
+
 from __future__ import annotations
-import structlog
-import pymupdf4llm
+
 import fitz  # PyMuPDF
+import pymupdf4llm
+import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -57,8 +59,5 @@ def has_heading_structure(md_text: str, min_headings: int = 2) -> bool:
     Returns False for scanned PDFs / flat prose — caller should use
     paragraph-fallback chunking instead.
     """
-    heading_lines = [
-        line for line in md_text.split("\n")
-        if line.strip().startswith("#")
-    ]
+    heading_lines = [line for line in md_text.split("\n") if line.strip().startswith("#")]
     return len(heading_lines) >= min_headings

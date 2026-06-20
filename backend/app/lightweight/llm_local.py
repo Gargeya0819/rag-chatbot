@@ -10,12 +10,16 @@ Model: Qwen2.5-7B-Instruct, Q4_K_M GGUF quantization (~4.5GB).
 Chosen for 16GB RAM / CPU-only machines — fits with headroom for the OS,
 Docker, and the existing Postgres container from your cloud RAG mode.
 """
+
 from __future__ import annotations
+
 import os
 import re
-import structlog
 from pathlib import Path
-from llama_cpp import Llama
+from typing import cast
+
+import structlog
+from llama_cpp import CreateChatCompletionResponse, Llama
 
 from app.lightweight.sectioner import Section
 
@@ -26,7 +30,7 @@ _MODEL_DIR = Path(os.getenv("LLAMA_MODEL_DIR", "/models"))
 _MODEL_FILENAME = os.getenv("LLAMA_MODEL_FILE", "qwen2.5-7b-instruct-q4_k_m.gguf")
 _MODEL_PATH = _MODEL_DIR / _MODEL_FILENAME
 
-_N_CTX = int(os.getenv("LLAMA_N_CTX", "8192"))       # context window
+_N_CTX = int(os.getenv("LLAMA_N_CTX", "8192"))  # context window
 _N_THREADS = int(os.getenv("LLAMA_N_THREADS", "0"))  # 0 = auto-detect CPU cores
 
 _FIND_PROMPT = """\
@@ -61,7 +65,7 @@ class LocalLLM:
     for users who only use the cloud RAG mode.
     """
 
-    _instance: "LocalLLM | None" = None
+    _instance: LocalLLM | None = None
     _model: Llama | None = None
 
     def __new__(cls):
@@ -105,17 +109,18 @@ class LocalLLM:
             logger.info("llm_local.small_doc_bypass", sections=len(sections))
             return list(range(min(len(sections), max_sections)))
 
-        titles_block = "\n".join(
-            f"{i + 1}. {s.title}" for i, s in enumerate(sections)
-        )
+        titles_block = "\n".join(f"{i + 1}. {s.title}" for i, s in enumerate(sections))
         prompt = _FIND_PROMPT.format(titles=titles_block, question=question)
 
-        response = self._model.create_chat_completion(
+        assert self._model is not None  # guaranteed by _ensure_loaded()
+        model = self._model
+        response = model.create_chat_completion(
             messages=[{"role": "user", "content": prompt}],
             max_tokens=64,
             temperature=0.0,
         )
-        raw = response["choices"][0]["message"]["content"].strip()
+        response = cast(CreateChatCompletionResponse, response)
+        raw = (response["choices"][0]["message"]["content"] or "").strip()
 
         # Parse out numbers, ignore anything else the model might add
         numbers = [int(n) for n in re.findall(r"\d+", raw)]
@@ -144,17 +149,19 @@ class LocalLLM:
             return "I couldn't find a relevant section in this document to answer that question."
 
         sections_block = "\n\n---\n\n".join(
-            f"## {sections[i].title}\n{sections[i].content}"
-            for i in chosen_indices
+            f"## {sections[i].title}\n{sections[i].content}" for i in chosen_indices
         )
         prompt = _ANSWER_PROMPT.format(sections=sections_block, question=question)
 
-        response = self._model.create_chat_completion(
+        assert self._model is not None  # guaranteed by _ensure_loaded()
+        model = self._model
+        response = model.create_chat_completion(
             messages=[{"role": "user", "content": prompt}],
             max_tokens=1024,
             temperature=0.1,
         )
-        answer = response["choices"][0]["message"]["content"].strip()
+        response = cast(CreateChatCompletionResponse, response)
+        answer = (response["choices"][0]["message"]["content"] or "").strip()
 
         logger.info("llm_local.answer_done", question=question[:60], chars=len(answer))
         return answer

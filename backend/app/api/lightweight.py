@@ -9,19 +9,21 @@ frontend can switch modes with minimal branching:
   DELETE /api/v1/lightweight/documents/{id}
   POST /api/v1/lightweight/chat     — Find -> Retrieve -> Answer workflow
 """
+
 from __future__ import annotations
+
 import time
+
 import structlog
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
 
+from app.lightweight.llm_local import get_local_llm
 from app.lightweight.parser import extract_markdown_from_bytes, has_heading_structure
 from app.lightweight.sectioner import split_into_sections
 from app.lightweight.store import get_store
-from app.lightweight.llm_local import get_local_llm
 
 logger = structlog.get_logger(__name__)
-from fastapi import APIRouter
 lightweight_router = APIRouter(prefix="/lightweight", tags=["Lightweight Local RAG"])
 
 _ALLOWED_EXTENSIONS = {"pdf"}  # PyMuPDF4LLM's primary target; extend later if needed
@@ -29,6 +31,7 @@ _MAX_FILE_SIZE = 50 * 1024 * 1024
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────
+
 
 class LightweightUploadResponse(BaseModel):
     document_id: str
@@ -64,7 +67,10 @@ class LightweightChatResponse(BaseModel):
 
 # ── Endpoints ─────────────────────────────────────────────────────────────
 
-@lightweight_router.post("/upload", response_model=LightweightUploadResponse, status_code=status.HTTP_201_CREATED)
+
+@lightweight_router.post(
+    "/upload", response_model=LightweightUploadResponse, status_code=status.HTTP_201_CREATED
+)
 async def upload_lightweight(file: UploadFile = File(...)) -> LightweightUploadResponse:
     """
     Parse a PDF with PyMuPDF4LLM and split into sections.
@@ -124,7 +130,9 @@ async def list_lightweight_documents() -> list[LightweightDocumentOut]:
     ]
 
 
-@lightweight_router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+@lightweight_router.delete(
+    "/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None
+)
 async def delete_lightweight_document(document_id: str):
     store = get_store()
     if not store.delete_document(document_id):
@@ -160,8 +168,7 @@ async def chat_lightweight(request: LightweightChatRequest) -> LightweightChatRe
         ) from exc
 
     sources = [
-        LightweightSourceOut(title=sections[i].title, content=sections[i].content)
-        for i in chosen_indices
+        LightweightSourceOut(title=sections[i].title, content=sections[i].content) for i in chosen_indices
     ]
 
     latency_ms = round((time.perf_counter() - t0) * 1000, 1)

@@ -1,10 +1,13 @@
-from sqlalchemy import Column, String, Text, Integer, DateTime, JSON, Float
-from sqlalchemy.dialects.postgresql import UUID
-from pgvector.sqlalchemy import Vector
-from app.db.database import Base
-from app.core.config import settings
 import uuid
 from datetime import datetime
+
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import JSON, Column, DateTime, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.core.config import settings
+from app.db.database import Base
+
 
 class Document(Base):
     __tablename__ = "documents"
@@ -16,6 +19,7 @@ class Document(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     metadata_ = Column("metadata", JSON, default=dict)
 
+
 class Chunk(Base):
     __tablename__ = "chunks"
 
@@ -24,6 +28,6 @@ class Chunk(Base):
     filename = Column(String(255))
     content = Column(Text, nullable=False)
     chunk_index = Column(Integer)
-    embedding = Column(Vector(settings.EMBEDDING_DIM))
+    embedding: Vector = Column(Vector(settings.EMBEDDING_DIM))
     created_at = Column(DateTime, default=datetime.utcnow)
     metadata_ = Column("metadata", JSON, default=dict)

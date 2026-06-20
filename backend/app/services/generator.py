@@ -1,8 +1,9 @@
-import httpx
-from typing import List
-from app.db.schemas import SourceChunk
-from app.core.config import settings
 import logging
+
+import httpx
+
+from app.core.config import settings
+from app.db.schemas import SourceChunk
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ GENERAL_PROMPT = """You are a helpful AI assistant. Answer the following questio
 {history}QUESTION: {question}
 ANSWER:"""
 
+
 def build_history(history: list) -> str:
     if not history:
         return ""
@@ -29,7 +31,8 @@ def build_history(history: list) -> str:
         lines.append(f"{role}: {m.get('content', '')}")
     return "CONVERSATION HISTORY:\n" + "\n".join(lines) + "\n\n"
 
-async def generate_answer(question: str, chunks: List[SourceChunk], history: List[dict] = None) -> str:
+
+async def generate_answer(question: str, chunks: list[SourceChunk], history: list[dict] | None = None) -> str:
     h = build_history(history or [])
     if chunks:
         ctx = "\n\n".join(f"[{c.filename}]:\n{c.content}" for c in chunks)
@@ -45,8 +48,8 @@ async def generate_answer(question: str, chunks: List[SourceChunk], history: Lis
                     "model": settings.OLLAMA_MODEL,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"temperature": 0.7, "num_predict": 800, "top_p": 0.9}
-                }
+                    "options": {"temperature": 0.7, "num_predict": 800, "top_p": 0.9},
+                },
             )
             r.raise_for_status()
             return r.json()["response"].strip()

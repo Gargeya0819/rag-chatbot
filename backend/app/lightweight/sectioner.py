@@ -11,10 +11,13 @@ Two strategies:
      using the first line of text, so the Find step still has something
      meaningful to choose between.
 """
+
 from __future__ import annotations
+
 import re
-import structlog
 from dataclasses import dataclass
+
+import structlog
 
 from app.lightweight.parser import has_heading_structure
 
@@ -29,8 +32,8 @@ _FALLBACK_TITLE_MAX_CHARS = 60
 class Section:
     title: str
     content: str
-    level: int          # heading level (1=#, 2=##, etc.) — 0 for fallback sections
-    index: int           # position in document
+    level: int  # heading level (1=#, 2=##, etc.) — 0 for fallback sections
+    index: int  # position in document
 
 
 def split_into_sections(md_text: str, document_title: str = "Document") -> list[Section]:
@@ -101,11 +104,13 @@ def _split_by_paragraphs(md_text: str) -> list[Section]:
         if not title:
             title = f"Section {len(sections) + 1}"
 
-        sections.append(Section(
-            title=title,
-            content=content,
-            level=0,
-            index=len(sections),
-        ))
+        sections.append(
+            Section(
+                title=title,
+                content=content,
+                level=0,
+                index=len(sections),
+            )
+        )
 
     return sections

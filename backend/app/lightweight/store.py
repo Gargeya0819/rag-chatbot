@@ -10,10 +10,13 @@ Trade-off: documents are lost on backend restart. For a personal/local
 tool this is usually fine; swap in a JSON-file-backed store if you want
 persistence without a full database.
 """
+
 from __future__ import annotations
+
 import uuid
+from dataclasses import dataclass
+
 import structlog
-from dataclasses import dataclass, field
 
 from app.lightweight.sectioner import Section
 

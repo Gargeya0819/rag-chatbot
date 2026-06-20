@@ -159,3 +159,4 @@ docker compose logs backend
 **Slow responses?** Normal on CPU — llama3.2 takes ~30-60s per response without GPU. Try `phi3` for faster responses.
 
 **Port conflicts?** Change ports in `docker-compose.yml` (e.g., `3001:3000`).
+
