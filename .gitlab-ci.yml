@@ -1,6 +1,5 @@
-# GitLab CI Pipeline — explicit stages so each quality gate is independently
-# visible (format / lint / type_check / test / coverage), matching what
-# compliance scanners look for stage-by-stage rather than bundled jobs.
+# GitLab CI Pipeline — adds a dependency-audit stage (pip-audit) on top of
+# the existing lint/format/type_check/test/coverage stages.
 
 stages:
   - lint
@@ -8,6 +7,7 @@ stages:
   - type_check
   - test
   - coverage
+  - audit
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -54,3 +54,19 @@ coverage:
       coverage_report:
         coverage_format: cobertura
         path: backend/coverage.xml
+
+dependency_audit:
+  stage: audit
+  script:
+    - pip install -q pip-audit
+    - pip-audit -r requirements.txt --desc || true
+  allow_failure: true
+
+changelog:
+  stage: audit
+  image: orhunp/git-cliff:latest
+  script:
+    - git-cliff -o CHANGELOG.md
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  allow_failure: true
