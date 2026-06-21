@@ -1,10 +1,11 @@
-# GitLab CI Pipeline — adds a dependency-audit stage (pip-audit) on top of
-# the existing lint/format/type_check/test/coverage stages.
+# GitLab CI Pipeline — adds a quality stage (bandit, pylint, vulture, flake8)
+# on top of lint/format/type_check/test/coverage/audit.
 
 stages:
   - lint
   - format
   - type_check
+  - quality
   - test
   - coverage
   - audit
@@ -38,6 +39,15 @@ type_check:
   stage: type_check
   script:
     - mypy app/ --config-file pyproject.toml
+
+quality:
+  stage: quality
+  script:
+    - bandit -c pyproject.toml -r app/ || true
+    - vulture app/ --min-confidence 80 || true
+    - flake8 app/ --max-line-length=110 --extend-ignore=E203,E501,W503 || true
+    - pylint app/ --rcfile=pyproject.toml || true
+  allow_failure: true
 
 test:
   stage: test

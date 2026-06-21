@@ -21,6 +21,6 @@ async def run_query(db: AsyncSession, request: ChatRequest) -> ChatResponse:
         answer = await generate_answer(request.question, chunks, request.conversation_history or [])
         answer = apply_guardrails(answer, chunks)
         return ChatResponse(answer=answer, sources=chunks, rewritten_query=rewritten)
-    else:
-        answer = await generate_answer(request.question, [], request.conversation_history or [])
-        return ChatResponse(answer=answer, sources=[], rewritten_query=None)
+
+    answer = await generate_answer(request.question, [], request.conversation_history or [])
+    return ChatResponse(answer=answer, sources=[], rewritten_query=None)

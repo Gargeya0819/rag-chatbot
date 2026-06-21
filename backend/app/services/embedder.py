@@ -8,7 +8,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Lazy-loaded sentence transformers (only if needed)
-_st_model = None
+_st_model = None  # pylint: disable=invalid-name  # module-level cache, not a constant
 
 
 def _get_st_model():
@@ -47,13 +47,13 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
     if settings.EMBEDDING_BACKEND == "sentence_transformers":
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, embed_texts_st, texts)
-    else:
-        try:
-            return await embed_texts_ollama(texts)
-        except Exception as e:
-            logger.warning(f"Ollama embed failed ({e}), falling back to SentenceTransformers")
-            loop = asyncio.get_event_loop()
-            return await loop.run_in_executor(None, embed_texts_st, texts)
+
+    try:
+        return await embed_texts_ollama(texts)
+    except Exception as e:
+        logger.warning(f"Ollama embed failed ({e}), falling back to SentenceTransformers")
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, embed_texts_st, texts)
 
 
 async def embed_query(query: str) -> list[float]:

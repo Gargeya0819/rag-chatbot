@@ -5,7 +5,7 @@ from app.db.schemas import SourceChunk
 
 logger = logging.getLogger(__name__)
 
-_reranker: object = None  # CrossEncoder | None | Literal[False]; typed loosely to avoid importing CrossEncoder at module load time
+_reranker: object = None  # CrossEncoder|None|False; loosely typed to avoid import at module load
 
 
 def _get_reranker():

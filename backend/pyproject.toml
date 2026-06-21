@@ -39,3 +39,23 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 addopts = "-v --tb=short"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = ["B101"]  # B101 = assert used (fine in our codebase, including tests)
+
+[tool.vulture]
+min_confidence = 80
+paths = ["app"]
+exclude = ["tests/"]
+
+[tool.pylint.main]
+disable = [
+    "C0114", "C0115", "C0116",  # missing docstrings — many already covered by code comments
+    "R0903",                     # too-few-public-methods — common for Pydantic schemas
+    "W0718",                     # broad-exception-caught — intentional for graceful degradation in RAG pipeline
+    "W1203",                     # logging-fstring-interpolation — f-strings preferred for readability here
+    "C0415",                     # import-outside-toplevel — intentional lazy imports for optional heavy ML deps
+    "W0603",                     # global-statement — intentional for module-level singleton caching
+]
+max-line-length = 110

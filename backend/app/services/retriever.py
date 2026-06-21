@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 async def vector_search(db: AsyncSession, query_embedding: list[float], k: int) -> list[tuple]:
     emb_str = "[" + ",".join(map(str, query_embedding)) + "]"
-    sql = text(f"""
+    sql = text("""
         SELECT id, document_id, filename, content, chunk_index,
-               1 - (embedding <=> '{emb_str}'::vector) AS score
+               1 - (embedding <=> CAST(:emb_str AS vector)) AS score
         FROM chunks
-        ORDER BY embedding <=> '{emb_str}'::vector
-        LIMIT {k}
+        ORDER BY embedding <=> CAST(:emb_str AS vector)
+        LIMIT :k
     """)
-    result = await db.execute(sql)
+    result = await db.execute(sql, {"emb_str": emb_str, "k": k})
     return [(row, float(row.score)) for row in result.fetchall()]
 
 

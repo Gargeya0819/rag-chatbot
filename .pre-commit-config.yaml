@@ -1,4 +1,4 @@
-# Full .pre-commit-config.yaml with gitleaks secret scanning added.
+# Full .pre-commit-config.yaml with all quality/security linters added.
 # This REPLACES your existing .pre-commit-config.yaml entirely.
 
 repos:
@@ -31,6 +31,56 @@ repos:
           - pydantic==2.10.3
           - fastapi==0.115.5
           - sqlalchemy==2.0.36
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        name: bandit (security static analysis)
+        args: ["-c", "backend/pyproject.toml"]
+        files: ^backend/app/
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.13
+    hooks:
+      - id: vulture
+        name: vulture (dead code detection)
+        args: ["backend/app", "--min-confidence", "80"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        name: flake8 (style checking)
+        files: ^backend/app/
+        args: ["--max-line-length=110", "--extend-ignore=E203,E501,W503"]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.18.0
+    hooks:
+      - id: pyupgrade
+        name: pyupgrade (modernize syntax)
+        args: ["--py311-plus"]
+        files: ^backend/app/
+
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v3.3.1
+    hooks:
+      - id: pylint
+        name: pylint (code analysis)
+        args: ["--rcfile=backend/pyproject.toml"]
+        files: ^backend/app/
+        additional_dependencies: ["fastapi", "pydantic", "sqlalchemy", "httpx", "sentence-transformers"]
+
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.96.0
+    hooks:
+      - id: semgrep
+        name: semgrep (pattern-based security scanning)
+        args: ["--config=auto", "--error"]
+        files: ^backend/app/
+        additional_dependencies: ["setuptools<81"]
 
   - repo: local
     hooks:

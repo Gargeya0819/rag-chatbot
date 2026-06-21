@@ -29,7 +29,7 @@ async def extract_text(content: bytes, filename: str, content_type: str) -> str:
     return content.decode("utf-8", errors="ignore")
 
 
-async def ingest_document(
+async def ingest_document(  # pylint: disable=too-many-locals
     db: AsyncSession, content: bytes, filename: str, content_type: str
 ) -> tuple[uuid.UUID, int]:
     extracted = await extract_text(content, filename, content_type)

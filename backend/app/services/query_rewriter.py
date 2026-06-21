@@ -6,7 +6,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-REWRITE_PROMPT = """You are a search query optimizer. Rewrite the user's question into a clear, 
+REWRITE_PROMPT = """You are a search query optimizer. Rewrite the user's question into a clear,
 specific search query that will retrieve the most relevant documents.
 
 Rules:
