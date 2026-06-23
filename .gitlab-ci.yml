@@ -19,6 +19,8 @@ cache:
 
 default:
   image: python:3.11-slim
+  tags:
+    - admin
   before_script:
     - apt-get update -qq && apt-get install -y -qq build-essential curl libpq-dev libmagic1 poppler-utils tesseract-ocr > /dev/null
     - cd backend
